@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/lib/prisma";
+import { upsertSprint } from "@/lib/sprint";
 import { auth } from "@clerk/nextjs/server";
 
 export async function createSprint(projectId, data) {
@@ -19,17 +20,17 @@ export async function createSprint(projectId, data) {
     throw new Error("Project not found");
   }
 
-  const sprint = await db.sprint.create({
-    data: {
-      name: data.name,
-      startDate: data.startDate,
-      endDate: data.endDate,
-      status: "PLANNED",
+  try {
+    // Using upsert instead of create
+    const sprint = await upsertSprint({
+      ...data,
       projectId: projectId,
-    },
-  });
+    });
 
-  return sprint;
+    return sprint;
+  } catch (error) {
+    throw new Error(`Failed to create sprint: ${error.message}`);
+  }
 }
 
 export async function updateSprintStatus(sprintId, newStatus) {
@@ -80,3 +81,4 @@ export async function updateSprintStatus(sprintId, newStatus) {
     throw new Error(error.message);
   }
 }
+
