@@ -82,3 +82,47 @@ export async function updateSprintStatus(sprintId, newStatus) {
   }
 }
 
+export async function getAllSprints() {
+  const { userId, orgId } = auth();
+  if (!userId || !orgId) {
+    throw new Error("Unauthorized");
+  }
+
+  const sprints = await db.sprint.findMany({
+    where: {
+      project: {
+        organizationId: orgId,
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return sprints;
+}
+
+export async function updateSprintDates(sprintId, startDate, endDate) {
+  const { userId, orgId, orgRole } = auth();
+  if (!userId || !orgId || orgRole !== "org:admin") {
+    throw new Error("Unauthorized");
+  }
+
+  const sprint = await db.sprint.findUnique({
+    where: { id: sprintId },
+    include: { project: true },
+  });
+
+  if (!sprint || sprint.project.organizationId !== orgId) {
+    throw new Error("Sprint not found or unauthorized");
+  }
+
+  // Optionally add validation checks here
+
+  const updatedSprint = await db.sprint.update({
+    where: { id: sprintId },
+    data: { startDate, endDate },
+  });
+
+  return { success: true, sprint: updatedSprint };
+}

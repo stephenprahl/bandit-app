@@ -1,20 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { toast } from "sonner";
-import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { BarLoader } from "react-spinners";
-import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import useFetch from "@/hooks/use-fetch";
+import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
+import { Plus } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { BarLoader } from "react-spinners";
+import { toast } from "sonner";
 
-import statuses from "@/data/status";
 import { getIssuesForSprint, updateIssueOrder } from "@/actions/issues";
+import statuses from "@/data/status";
 
-import SprintManager from "./sprint-manager";
-import IssueCreationDrawer from "./create-issue";
 import IssueCard from "@/components/issue-card";
 import BoardFilters from "./board-filters";
+import IssueCreationDrawer from "./create-issue";
+import SprintManager from "./sprint-manager";
 
 function reorder(list, startIndex, endIndex) {
   const result = Array.from(list);
@@ -25,6 +27,7 @@ function reorder(list, startIndex, endIndex) {
 }
 
 export default function SprintBoard({ sprints, projectId, orgId }) {
+  const router = useRouter();
   const [currentSprint, setCurrentSprint] = useState(
     sprints.find((spr) => spr.status === "ACTIVE") || sprints[0]
   );
@@ -42,9 +45,9 @@ export default function SprintBoard({ sprints, projectId, orgId }) {
 
   const [filteredIssues, setFilteredIssues] = useState(issues);
 
-  const handleFilterChange = (newFilteredIssues) => {
+  const handleFilterChange = useCallback((newFilteredIssues) => {
     setFilteredIssues(newFilteredIssues);
-  };
+  }, [setFilteredIssues]);
 
   useEffect(() => {
     if (currentSprint.id) {
@@ -141,6 +144,9 @@ export default function SprintBoard({ sprints, projectId, orgId }) {
 
   return (
     <div className="flex flex-col">
+      <Button variant="ghost" onClick={() => router.back()}>
+        Back
+      </Button>
       <SprintManager
         sprint={currentSprint}
         setSprint={setCurrentSprint}
@@ -149,7 +155,12 @@ export default function SprintBoard({ sprints, projectId, orgId }) {
       />
 
       {issues && !issuesLoading && (
-        <BoardFilters issues={issues} onFilterChange={handleFilterChange} />
+        <>
+          <BoardFilters issues={issues} onFilterChange={handleFilterChange} />
+          <Button onClick={() => setFilteredIssues(issues)}>
+            Show All Issues
+          </Button>
+        </>
       )}
 
       {updateIssuesError && (
@@ -221,6 +232,10 @@ export default function SprintBoard({ sprints, projectId, orgId }) {
           ))}
         </div>
       </DragDropContext>
+
+      <Button variant="secondary" asChild>
+        <Link href={`/project/${projectId}/timeline`}>View Timeline</Link>
+      </Button>
 
       <IssueCreationDrawer
         isOpen={isDrawerOpen}

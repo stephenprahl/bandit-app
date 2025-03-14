@@ -1,10 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -12,6 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { X } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const priorities = ["LOW", "MEDIUM", "HIGH", "URGENT"];
 
@@ -74,9 +74,8 @@ export default function BoardFilters({ issues, onFilterChange }) {
               return (
                 <div
                   key={assignee.id}
-                  className={`rounded-full ring ${
-                    selected ? "ring-blue-600" : "ring-black"
-                  } ${i > 0 ? "-ml-6" : ""}`}
+                  className={`rounded-full ring ${selected ? "ring-blue-600" : "ring-black"
+                    } ${i > 0 ? "-ml-6" : ""}`}
                   style={{
                     zIndex: i,
                   }}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -9,15 +9,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
+import { useEffect, useState } from "react";
+import { DayPicker } from "react-day-picker";
 
+import { format, formatDistanceToNow, isAfter, isBefore } from "date-fns";
 import { BarLoader } from "react-spinners";
-import { formatDistanceToNow, isAfter, isBefore, format } from "date-fns";
 
 import useFetch from "@/hooks/use-fetch";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { updateSprintStatus } from "@/actions/sprints";
+import { updateSprintDates, updateSprintStatus } from "@/actions/sprints";
 
 export default function SprintManager({
   sprint,
@@ -26,6 +27,8 @@ export default function SprintManager({
   projectId,
 }) {
   const [status, setStatus] = useState(sprint.status);
+  const [showDateEditor, setShowDateEditor] = useState(false);
+  const [newDates, setNewDates] = useState({ from: sprint.startDate, to: sprint.endDate });
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -34,6 +37,8 @@ export default function SprintManager({
     loading,
     data: updatedStatus,
   } = useFetch(updateSprintStatus);
+
+  const { fn: updateDates, data: updatedDates } = useFetch(updateSprintDates);
 
   const startDate = new Date(sprint.startDate);
   const endDate = new Date(sprint.endDate);
@@ -48,6 +53,11 @@ export default function SprintManager({
     updateStatus(sprint.id, newStatus);
   };
 
+  const handleDateSubmit = async () => {
+    await updateDates(sprint.id, newDates.from, newDates.to);
+    setShowDateEditor(false);
+  };
+
   useEffect(() => {
     if (updatedStatus && updatedStatus.success) {
       setStatus(updatedStatus.sprint.status);
@@ -57,6 +67,13 @@ export default function SprintManager({
       });
     }
   }, [updatedStatus, loading, setSprint, sprint]);
+
+  useEffect(() => {
+    if (updatedDates?.success) {
+      setSprint({ ...sprint, ...updatedDates.sprint });
+      setStatus(updatedDates.sprint.status);
+    }
+  }, [updatedDates]);
 
   const getStatusText = () => {
     if (status === "COMPLETED") {
@@ -124,12 +141,27 @@ export default function SprintManager({
             End Sprint
           </Button>
         )}
+        <Button onClick={() => setShowDateEditor(!showDateEditor)}>
+          Edit Dates
+        </Button>
       </div>
       {loading && <BarLoader width={"100%"} className="mt-2" color="#36d7b7" />}
       {getStatusText() && (
         <Badge variant="" className="mt-3 ml-1 self-start">
           {getStatusText()}
         </Badge>
+      )}
+      {showDateEditor && (
+        <div className="mt-2">
+          <DayPicker
+            mode="range"
+            selected={newDates}
+            onSelect={(range) => setNewDates(range)}
+          />
+          <Button onClick={handleDateSubmit}>
+            Save New Dates
+          </Button>
+        </div>
       )}
     </>
   );
