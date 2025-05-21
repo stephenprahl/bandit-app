@@ -76,13 +76,13 @@ export default function Home() {
       {/* Hero Section */}
       <section className="container mx-auto py-20 text-center">
         <h1 className="text-6xl sm:text-7xl lg:text-8xl font-extrabold gradient-title pb-6 flex flex-col">
-          #1 In Project Management <br />
+          #1 In Fire Safety <br />
           <span className="flex mx-auto gap-3 sm:gap-4 items-center  text-pink-600 font-serif">
-            BANDIT
+            FSI Fire
           </span>
         </h1>
         <p className="text-xl text-gray-300 mb-10 max-w-3xl mx-auto">
-          Empower your team with our intuitive project management solution.
+          "Ensure Safety, Prevent Fires: Inspect Now, Thrive Later!"
         </p>
         <p className="text-xl mb-12 max-w-2xl mx-auto"></p>
         <Link href="/onboarding">
@@ -151,7 +151,7 @@ export default function Home() {
             Ready to Transform Your Workflow?
           </h3>
           <p className="text-xl mb-12">
-            Join thousands of teams already using Bandit to streamline their
+            Join thousands of teams already using FSI Fire to streamline their
             projects and boost productivity.
           </p>
           <Link href="/onboarding">
